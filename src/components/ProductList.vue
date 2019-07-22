@@ -1,7 +1,11 @@
 <template>
     <div>
         <h1>Product List</h1>
-        <li v-for="product in products">
+        <img
+          v-if="loading"
+          src="https://i.imgur.com/JfPpwOA.gif"
+          >
+        <li v-else v-for="product in products">
             {{product.title}} = {{ product.price}}
         </li>
     </div>
@@ -12,6 +16,11 @@
 <script>
     import store from '@/store/index'
     export default {
+        data(){
+          return {
+            loading: true
+          }
+        },
         computed: {
           products () {
             return store.getters.availableProducts
@@ -19,6 +28,9 @@
         },
         created () {
           store.dispatch('fetchProducts')
+            .then(() => {
+              this.loading = false
+            })
         }
 
     }
