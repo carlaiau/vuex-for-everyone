@@ -7,7 +7,8 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     products: [],
-    cart: [] // This will hold {id, quantity}
+    cart: [], // This will hold {id, quantity}
+    checkoutStatus: null
   },
   getters: {
     availableProducts(state){
@@ -35,9 +36,16 @@ export default new Vuex.Store({
       return getters.cartProducts.reduce((total, product) =>
         total + product.price * product.quantity, 0
       )
+    },
+    checkoutStatus(state){
+      return state.checkoutStatus
     }
   },
   actions: {
+    // Note ES6 destructuring of the context parameter in the function declarations
+    // Be careful that what you're destructing is not a primitive type.
+    // If it is primitive type, all you're doing is making a local copy and amending that
+    // Hence why you can't destructure the mutation declarations
     fetchProducts: function ({commit}) {
       return new Promise((resolve, reject) => {
         shop.getProducts(products => {
@@ -46,18 +54,27 @@ export default new Vuex.Store({
         })
       })
     },
-    addProductToCart(context, product){
-      // Find cartItem
+    addProductToCart({state, commit}, product){
       if( product.inventory > 0) {
-        const cartItem = context.state.cart.find(item => item.id === product.id)
+        const cartItem = state.cart.find(item => item.id === product.id)
         if(!cartItem){
-          context.commit('pushProductToCart', product.id)
+          commit('pushProductToCart', product.id)
         } else{
-          context.commit('incrementItemQuantity', cartItem)
+          commit('incrementItemQuantity', cartItem)
         }
-        context.commit('decrementProductInventory', product)
+        commit('decrementProductInventory', product)
       }
-
+    },
+    checkout({state, commit}){
+      shop.buyProducts(
+        state.cart,
+        () => {
+          commit('emptyCart');
+          commit('setCheckoutStatus', 'success')
+        },
+        () => {
+          commit('setCheckoutStatus', 'fail')
+        })
     }
   },
   mutations: {
@@ -75,6 +92,13 @@ export default new Vuex.Store({
     },
     decrementProductInventory(state, product){
       product.inventory--
+    },
+    setCheckoutStatus(state, status){
+      state.checkoutStatus = status
+    },
+    emptyCart(state){
+      state.cart = []
     }
+
   }
 })
