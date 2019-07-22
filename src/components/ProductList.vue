@@ -1,12 +1,14 @@
 <template>
     <div>
         <h1>Product List</h1>
+        <p v-if="added">Product Added!</p>
         <img
           v-if="loading"
           src="https://i.imgur.com/JfPpwOA.gif"
           >
         <li v-else v-for="product in products">
-            {{product.title}} = {{ product.price}}
+            {{product.title}} = {{ product.price | currency}} - {{product.inventory}}
+            <button @click="addProductToCart(product)">Add to Cart</button>
         </li>
     </div>
 
@@ -14,20 +16,26 @@
 </template>
 
 <script>
-    import store from '@/store/index'
     export default {
         data(){
           return {
-            loading: true
+            loading: true,
+            added : false,
           }
         },
         computed: {
           products () {
-            return store.getters.availableProducts
+            return this.$store.getters.availableProducts
+          }
+        },
+
+        methods: {
+          addProductToCart(product){
+            this.$store.dispatch('addProductToCart', product)
           }
         },
         created () {
-          store.dispatch('fetchProducts')
+          this.$store.dispatch('fetchProducts')
             .then(() => {
               this.loading = false
             })
