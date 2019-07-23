@@ -1,6 +1,7 @@
 import shop from '@/api/shop'
 
 export default {
+  namespaced: true,
   state: {
     items: []
   },
@@ -16,11 +17,11 @@ export default {
     }
   },
   actions: {
-    // Note ES6 destructuring of the context parameter in the function declarations
-    // Be careful that what you're destructing is not a primitive type.
-    // If it is primitive type, all you're doing is making a local copy and amending that
-    // Hence why you can't destructure the mutation declarations
     fetchProducts: function ({commit}) {
+      // Note ES6 destructuring of the context parameter in the function declarations
+      // Be careful that what you're destructing is not a primitive type.
+      // If it is primitive type, all you're doing is making a local copy and amending that
+      // Hence why you can't destructure the mutation declarations
       return new Promise((resolve, reject) => {
         shop.getProducts(products => {
           commit('setProducts', products)

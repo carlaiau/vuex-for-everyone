@@ -28,18 +28,21 @@
         },
 
         computed: {
-          ...mapState({
-            products: state => state.products.items,
+          ...mapState('products', {
+            products: state => state.items,
           }),
-          ...mapGetters({
+          ...mapGetters('products', {
             productIsInStock: 'productIsInStock'
           })
         },
         methods: {
-          ...mapActions({
+          ...mapActions('products', {
             fetchProducts: 'fetchProducts',
+          }),
+          ...mapActions('cart', {
             addProductToCart: 'addProductToCart'
           })
+
         },
         created () {
           this.fetchProducts()
