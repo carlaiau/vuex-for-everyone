@@ -37,9 +37,6 @@ export default new Vuex.Store({
         total + product.price * product.quantity, 0
       )
     },
-    checkoutStatus(state){
-      return state.checkoutStatus
-    },
     productIsInStock(){
       return (product) => {
         return product.inventory > 0
@@ -60,7 +57,7 @@ export default new Vuex.Store({
       })
     },
     addProductToCart({state, getters, commit}, product){
-      if( getters.productIsInStock(product)) {
+      if(getters.productIsInStock(product)) {
         const cartItem = state.cart.find(item => item.id === product.id)
         if(!cartItem){
           commit('pushProductToCart', product.id)
@@ -71,8 +68,15 @@ export default new Vuex.Store({
       }
     },
     checkout({state, commit}){
+      // Here destructuring is fine because we never actually want to mutate state
+      // That is what mutations are for :)
+      const { cart } = state;
+      if(cart.length === 0) {
+        alert("no products in cart")
+        return
+      }
       shop.buyProducts(
-        state.cart,
+        cart,
         () => {
           commit('emptyCart');
           commit('setCheckoutStatus', 'success')
